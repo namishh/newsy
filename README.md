@@ -2,3 +2,12 @@
 very simple news app
 
 feel free to make it beautiful
+
+
+
+
+### made with news.api and tkinter
+
+https://newsapi.org/
+
+https://docs.python.org/3/library/tkinter.html
