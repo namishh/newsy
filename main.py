@@ -6,7 +6,10 @@ root = tk.Tk()
 root.geometry("1920x1080")
 root.title("News App")
 
-newsapi = NewsApiClient(api_key='9319a21a7472491897d5efd548f290dc')
+
+# get your api from https://newsapi.org/
+
+newsapi = NewsApiClient(api_key='{get your api from https://newsapi.org/ }')
 
 label = tk.Label(root, text="", font=('Helvetica', 15))
 label.place(relx=0, rely=0.25, relheight='0.7', relwidth='1')
