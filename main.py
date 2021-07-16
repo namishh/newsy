@@ -1,113 +1,129 @@
 from newsapi.newsapi_client import NewsApiClient
 import tkinter as tk
 import webbrowser
+from dotenv import load_dotenv
+import os
+load_dotenv(verbose=True)
 
-root = tk.Tk()
-root.geometry("1920x1080")
-root.title("News App")
+API_KEY = os.getenv('API_KEY')
 
-
-# get your api from https://newsapi.org/
 
 newsapi = NewsApiClient(api_key='{get your api from https://newsapi.org/ }')
 
-label = tk.Label(root, text="", font=('Helvetica', 15))
-label.place(relx=0, rely=0.25, relheight='0.7', relwidth='1')
 
-title = tk.Label(root, text="News App", font=('Modern', 40))
-title.place(relx=0.6, rely=0.01)
+class Newsy:
 
-top_headlines = newsapi.get_top_headlines(language='en', country='in')
-all_articles = newsapi.get_everything(sources='bbc-news,the-verge', domains='bbc.co.uk,techcrunch.com',
-                                      language='en', sort_by='relevancy', page=5)
-text = tk.StringVar()
-text.set("Label")
+    def __init__(self):
 
-li = [news['url'] for news in top_headlines['articles']]
-li2 = [news['url'] for news in all_articles['articles']]
+        self.root = tk.Tk()
+        self.root.geometry("1920x1080")
+        self.root.title("News App")
 
-clicked = tk.StringVar()
-clicked2 = tk.StringVar()
+        self.newsapi = NewsApiClient(api_key=API_KEY)
+
+        self.top_headlines = tk.StringVar()
+        self.all_articles = tk.StringVar()
+
+        self.query = None
+
+        self.createAndDisplay()
+
+    def exception_handler(func):
+
+        def wrapper(self, *args, **kwargs):
+
+            try:
+
+                return func(self, *args, **kwargs)
+
+            except:
+
+                self.articles_list.config(
+                    text=("There was error in processing your request."))
+
+        return wrapper
+
+    @exception_handler
+    def createAndDisplay(self):
+
+        self.articles_list = tk.Label(
+            self.root, text="", font=('Helvetica', 15))
+        self.articles_list.place(
+            relx=0, rely=0.25, relheight='0.7', relwidth='1')
+
+        title = tk.Label(self.root, text="News App", font=('Modern', 40))
+        title.place(relx=0.6, rely=0.01)
+
+        top_headlines = self.newsapi.get_top_headlines(
+            language='en', country='in')
+        all_articles = self.newsapi.get_everything(sources='bbc-news,the-verge', domains='bbc.co.uk,techcrunch.com',
+                                                   language='en', sort_by='relevancy', page=5)
+
+        top_headlines = [news['url'] for news in top_headlines['articles']]
+        all_articles = [news['url'] for news in all_articles['articles']]
+
+        drop = tk.OptionMenu(self.root, self.top_headlines, *top_headlines)
+        drop.place(relx=0, rely=0)
+
+        drop2 = tk.OptionMenu(self.root, self.all_articles, *all_articles)
+        drop2.place(relx=0, rely=0.1)
+
+        url_button = tk.Button(self.root, text="Select", bd=1,
+                               activebackground="#ffee96", command=self.get_url)
+        url_button.place(relx=0.8, rely=0)
+
+        headline = tk.Button(self.root, text="India News", bd=1,
+                             activebackground="#ffee96", command=self.get_headlines)
+        headline.place(relx=0.3, rely=0.2)
+
+        all_news = tk.Button(self.root, text="World News", bd=1,
+                             activebackground="#ffee96", command=self.get_news)
+        all_news.place(relx=0.4, rely=0.2)
+
+        self.query = tk.Entry(self.root, font=('Courier', 10), bd=0)
+        self.query.place(relx=0.5, rely=0.2)
+
+        search = tk.Button(self.root, text="Search", bd=1,
+                           activebackground="#ffee96", command=self.search_query)
+        search.place(relx=0.65, rely=0.2)
+
+    @exception_handler
+    def get_url(self):
+
+        webbrowser.open(self.top_headlines.get())
+
+        webbrowser.open(self.all_articles.get())
+
+    @exception_handler
+    def get_headlines(self):
+
+        articles = self.newsapi.get_top_headlines(
+            language='en', country='in')
+
+        self.articles_list.config(
+            text=(" ".join([news['title'] + "\n" for news in articles['articles']])))
+
+    @exception_handler
+    def get_news(self):
+
+        articles = self.newsapi.get_everything(sources='bbc-news,the-verge', domains='bbc.co.uk,techcrunch.com',
+                                               language='en', sort_by='relevancy', page=5)
+
+        self.articles_list.config(text=" ".join(
+            [news['title'] + "\n" for news in articles['articles']]))
+
+    @exception_handler
+    def search_query(self):
+
+        articles = self.newsapi.get_everything(
+            q=self.query.get(), language='en')
+
+        self.articles_list.config(
+            text=(" ".join([news['title'] + "\n" for news in articles['articles']])))
 
 
-def get_url():
-    try:
-        webpage = clicked.get()
-        webpage2 = clicked2.get()
-        webbrowser.open(webpage2)
-        webbrowser.open(webpage)
-    except Exception as e:
-        pass
+if __name__ == "__main__":
 
+    newsy = Newsy()
 
-def get_headlines():
-    try:
-
-        top_headlines = newsapi.get_top_headlines(language='en', country='in')
-        # print(top_headlines.keys())
-        # print(top_headlines['articles'] )
-        li = []
-        for news in top_headlines['articles']:
-            #print(news['title'] + " Url = " + news['url'])
-            li.append(news['title'])
-
-        # li2 = [news['title'] + " " + news['url'] for news in top_headlines['articles']]
-        label.config(text=(" ".join([news['title'] + "\n" for news in top_headlines['articles']])))
-    except Exception as e:
-        label.config(text=("There was error in processing your request."))
-
-
-def get_news():
-    try:
-
-        all_articles = newsapi.get_everything(sources='bbc-news,the-verge', domains='bbc.co.uk,techcrunch.com',
-                                              language='en', sort_by='relevancy', page=5)
-
-        li = []
-        for news in all_articles['articles']:
-            # print(news['title'] +  " Url = " + news['url'])
-            li.append(news['title'])
-
-        label.config(text=" ".join([news['title'] + "\n" for news in all_articles['articles']]))
-    except Exception as e:
-        label.config(text=("There was error in processing your request."))
-
-
-def search_query():
-    try:
-
-        top_headlines1 = newsapi.get_everything(q=query.get(), language='en')
-        li = []
-        for news in top_headlines1['articles']:
-            # print(news['title'] +  " Url = " + news['url'])
-            li.append(news['title'])
-
-        # li2 = [news['title'] + " " + news['url'] for news in top_headlines['articles']]
-
-        label.config(text=(" ".join([news['title'] + "\n" for news in top_headlines1['articles']])))
-    except Exception as e:
-        label.config(text=("There was error in processing your request."))
-
-
-drop = tk.OptionMenu(root, clicked, *li)
-drop.place(relx=0, rely=0)
-
-drop2 = tk.OptionMenu(root, clicked2, *li2)
-drop2.place(relx=0, rely=0.1)
-
-url_button = tk.Button(root, text="Select", bd=1, activebackground="#ffee96", command=lambda: get_url())
-url_button.place(relx=0.8, rely=0)
-
-headline = tk.Button(root, text="India News", bd=1, activebackground="#ffee96", command=lambda: get_headlines())
-headline.place(relx=0.3, rely=0.2)
-
-all_news = tk.Button(root, text="World News", bd=1, activebackground="#ffee96", command=lambda: get_news())
-all_news.place(relx=0.4, rely=0.2)
-
-query = tk.Entry(root, font=('Courier', 10), bd=0)
-query.place(relx=0.5, rely=0.2)
-
-search = tk.Button(root, text="Search", bd=1, activebackground="#ffee96", command=lambda: search_query())
-search.place(relx=0.65, rely=0.2)
-
-root.mainloop()
+    newsy.root.mainloop()
