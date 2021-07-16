@@ -8,7 +8,7 @@ load_dotenv(verbose=True)
 API_KEY = os.getenv('API_KEY')
 
 
-newsapi = NewsApiClient(api_key='{get your api from https://newsapi.org/ }')
+newsapi = NewsApiClient(api_key=API_KEY)
 
 
 class Newsy:
