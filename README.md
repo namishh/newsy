@@ -11,3 +11,5 @@ feel free to make it beautiful
 https://newsapi.org/
 
 https://docs.python.org/3/library/tkinter.html
+
+#### Download the code, and run the .exe file
